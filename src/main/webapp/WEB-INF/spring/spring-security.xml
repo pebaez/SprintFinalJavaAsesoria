@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns="http://www.springframework.org/schema/security"
+	xmlns:jpa="http://www.springframework.org/schema/data/jpa"
+	xmlns:repository="http://www.springframework.org/schema/data/repository"
+	xmlns:tx="http://www.springframework.org/schema/tx"
+	xmlns:task="http://www.springframework.org/schema/task"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
+		http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.3.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd
+		http://www.springframework.org/schema/data/jpa http://www.springframework.org/schema/data/jpa/spring-jpa-1.11.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.3.xsd
+		http://www.springframework.org/schema/data/repository http://www.springframework.org/schema/data/repository/spring-repository-2.1.xsd">
+		
+	<http auto-config="true">
+		<access-denied-handler error-page="/403" />
+		<intercept-url pattern="/login" access="permitAll"/>
+		<intercept-url pattern="/inicio" access="permitAll"/>
+		<intercept-url pattern="/Contacto" access="hasAnyAuthority('Profesional')"/>
+		<intercept-url pattern="/Cliente" access="hasAnyAuthority('Administrativo','Cliente','Usuario')"/>
+		<intercept-url pattern="/Profesional" access="hasAnyAuthority('Administrativo','Profesional','Cliente')"/>
+		<intercept-url pattern="/verPago" access="hasAnyAuthority('Administrativo','Admin','Profesional','Cliente')"/>
+		<intercept-url pattern="/CrearCapacitacion" access="hasAnyAuthority('Administrativo')"/>
+		<intercept-url pattern="/recursos" access="permitAll"/>
+				
+		<form-login login-page="/login"
+			authentication-failure-url="/error"
+			default-target-url="/inicio" 
+            always-use-default-target="true"
+			username-parameter="username"
+			password-parameter="password"/>
+		<csrf disabled="true"/>
+		<logout logout-success-url="/login"/>
+	
+	</http>
+	
+	
+	<authentication-manager>
+		<authentication-provider>
+			<password-encoder hash="bcrypt"></password-encoder>
+
+			<jdbc-user-service data-source-ref="ds"
+				users-by-username-query="select usuario as username, password, 1 as enabled from usuarios where usuario= ?"
+				authorities-by-username-query="select usuario as username, rol as authority from usuarios where usuario= ?"/>
+			
+		</authentication-provider>
+	</authentication-manager>
+	
+	
+	
+</beans:beans>
